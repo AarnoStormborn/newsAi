@@ -1,0 +1,13 @@
+pandas
+numpy
+jupyter
+scikit-learn
+python-box
+matplotlib
+seaborn
+fastapi
+pydantic
+uvicorn
+textblob
+nltk
+-e .
