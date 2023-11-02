@@ -36,13 +36,17 @@ class PredictionPipeline:
             category_prediction = self.classifier.predict(prediction_data)
             category = self.encoder.inverse_transform(category_prediction)
 
-            sentiment = self.sentiment.predict(prediction_data)
+            sentiment_score = self.sentiment.predict(prediction_data)
+
+            if sentiment_score[0] == 0:
+                sentiment = "Negative"
+            else: sentiment = "Positive"
 
             logging.info("Model Prediction Complete")
 
             predictions = {
                 'category': category,
-                'sentiment_probability': sentiment
+                'sentiment': sentiment
             }
 
             return predictions

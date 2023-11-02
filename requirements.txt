@@ -10,4 +10,6 @@ pydantic
 uvicorn
 textblob
 nltk
+jinja2
+python-multipart
 -e .

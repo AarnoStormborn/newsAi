@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 import typing as t
 import pandas as pd
 import uvicorn
@@ -14,18 +16,33 @@ class PredictionInputSchema(BaseModel):
     news_article: str
 
 app = FastAPI(name="NewsAi", description="I loveeeeeee NLP")
+templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
-async def index():
 
-    return {"Message: WELCOME TO END-TO-END NEWS CLASSIFICATION & SENTIMENT ANALYSIS"}
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse("home.html", {"request":request})
 
-@app.post("/infer")
-async def infer(data: PredictionInputSchema) -> t.Optional[t.Dict]:
+
+@app.post("/", response_class=HTMLResponse)
+def infer(request: Request, news_article: str=Form(...)):
+    data = pd.Series(data=[news_article])
+    prediction = predict_pipe.predict(data=data)
+    category = prediction['category'][0]
+    sentiment = prediction['sentiment']
+    context = {
+        "request": request,
+        "article": news_article,
+        "category": category.capitalize(),
+        "sentiment": sentiment
+    }
+    return templates.TemplateResponse("results.html", context=context)
+
+@app.post("/api")
+async def api_infer(data: PredictionInputSchema) -> t.Optional[t.Dict]:
 
     data = pd.Series(data=[data.model_dump()['news_article']])
     prediction = predict_pipe.predict(data=data)
-    print(prediction)
     return {
         "Category":prediction['category'][0],
         "Sentiment": "Positive" if prediction['sentiment_probability'][0] == 1 else "Negative"
